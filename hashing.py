@@ -6,17 +6,18 @@ def my_hash(data:str) -> int:
 print(my_hash('abc'))
 
 class HashItem:
-    def __init__(self, hash_val, data) -> None:
-        self.hash_val = hash_val
+    def __init__(self, key, data) -> None:
+        self.key = key
         self.data = data
 
     def __str__(self) -> str:
-        return f"{self.hash_val} -> {self.data}"
+        return f"{self.key} -> {self.data}"
 
     def __repr__(self) -> str:
-        return f"HashItem({self.hash_val},{self.data})"
+        return f"HashItem({self.key},{self.data})"
 
 class HashTable:
+    # Den skapar en hashtabell så att vi kan spara data
     def __init__(self) -> None:
         self.size = 8
         self.table: list[HashItem] = [None] * self.size
@@ -26,46 +27,52 @@ class HashTable:
     def _grow_table(self) -> None:
         self.size *= 2
         self.current = 0
-        print('Vi växer', self.size)
+        
         table = self.table
         self.table = [None] * self.size
 
         for item in table:
             if item:
-                self.append(item.hash_val, item.data)
+                self.append(item.key, item.data)
 
 
-    def append(self, hash_val, data):
-        hash_item = HashItem(hash_val=hash_val, data=data)
+    def append(self, key, data):
+        hash_item = HashItem(key=key, data=data)
 
-        _hash = my_hash(hash_val) % (self.size)
+        # Initialt hash value
+        _hash = my_hash(key) % (self.size)
+
 
         while True:
+            # Kollar om platsen är ledig
             if self.table[_hash]:
-                if self.table[_hash].hash_val == hash_val:
+                # Om den inte är ledig så kollar vi om det är samma 
+                if self.table[_hash].key == key:
                     break
+                # Annars stegar vi vidare
                 _hash += 1 
                 _hash = _hash % (self.size)
             else:
                 break
 
         if not self.table[_hash]:
+            # om vi lägger till en ny sak
             self.current += 1
 
         self.table[_hash] = hash_item
         if self.load():
             self._grow_table()
 
-    def get_item(self, hash_val) -> HashItem|None:
 
-        _hash = my_hash(hash_val) % (self.size)
+    def get_item(self, key) -> HashItem|None:
+        # Hämtar data från key om den finns
+        _hash = my_hash(key) % (self.size)
         
         while self.table[_hash]:
 
-            if self.table[_hash].hash_val == hash_val:
+            if self.table[_hash].key == key:
                 return self.table[_hash].data
             
-            print(_hash)
             _hash = (_hash + 1) % (self.size)
 
         return None
